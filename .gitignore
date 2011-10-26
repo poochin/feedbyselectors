@@ -1,0 +1,11 @@
+# 依存ライブラリ各種
+
+lib/BeautifulSoup.py
+lib/soupselect.py
+lib/dateutil
+
+stylesheets/bootstrap.min.css
+
+# コンパイル済みファイル
+*.pyc
+

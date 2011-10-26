@@ -1,0 +1,44 @@
+{% extends "custom.html" %}
+
+{% block title %}( - Test page){% endblock %}
+
+{% block contain %}
+  <div class="container">
+    <form method="post" name="f">
+      <div class="row">
+        <fieldset class="span10 offset2">
+          <legend>セレクタのテスト</legend>
+          <table class="zebra-striped">
+            <tr>
+              <th class="red">種別</th>
+              <th class="blue">セレクタ</th>
+              <th class="green">属性</th>
+            </tr>
+            <tr>
+              <td>実行テスト用</td>
+              <td><input type="text" name="selector" value="{{ selector }}"/></td>
+              <td><input type="text" name="attr" value="{{ attr }}" /></td>
+            </tr>
+          </table>
+        </fieldset>
+      </div>
+      <div class="row">
+        <div class="span1 offset12"><input type="submit" value="Test" /></div>
+      </div>
+    </form>
+    <div class="row">
+      <div class="span2 offset1"><p>取得結果:</p></div>
+      <div class="span11">
+        <ul>
+          {% for result in results %}
+          <li>{{ result }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="row">
+      <p class="span2 offset1">探索対象のHTML</p>
+      <div class="span12 testcode">{{ code }}</div>
+    </div>
+  </div>
+{% endblock %}

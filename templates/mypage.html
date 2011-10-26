@@ -1,0 +1,48 @@
+{% extends 'custom.html' %}
+
+{% block title %}( - MyPage){% endblock %}
+
+{% block contain %}
+  <h2>{{ username }} さんのマイページ</h2>
+  <div class="container">
+    <form action="/mypage/newfeed" method="post">
+      <h3>ページの新規作成</h3>
+      <div class="row">
+        <div class="span3"><label>ページ名</label></div>
+        <div class="span4"><input id="pagename" type="text" name="name" /></div>
+        <div class="span1"><input type="submit" name="action" value="create" /></div>
+      </div>
+    </form>
+    <h3>カスタムフィード</h3>
+    <div class="row">
+      <div class="span5 offset1">
+        {% if feeds %}
+        <table>
+          <tr>
+            <th>フィード名</th>
+            <th>フィードのパス</th>
+            <th>コマンド</th>
+          </tr>
+          {% for feed in feeds %}
+          <tr>
+            <td><a href="/edit/{{ feed.name }}">{{ feed.name }}</a></td>
+            <td>
+              <a href="/feed/{{ userid }}/{{ feed.name }}">/feed/{{ userid }}/{{ feed.name }}</a>
+            </td>
+            <td>
+              <form action="/mypage/deletefeed" method="post" style="margin: 0;">
+                <input type="hidden" name="name" value="{{ feed.name }}" />
+                <input type="submit" value="削除" />
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <p>カスタムフィードはまだありません。</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

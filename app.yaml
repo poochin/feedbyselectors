@@ -1,0 +1,38 @@
+application: new-project-template
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+# Directories
+- url: /stylesheets
+  static_dir: stylesheets
+
+# need admin login file
+- url: /feedbuilder
+  script: feedbuilder.py
+# login: admin
+
+# need login file
+- url: /mypage(/.+)?
+  script: mypage.py
+  login: required
+
+- url: /edit(/.+)?
+  script: edit.py
+  login: required
+
+- url: /log
+  script: log.py
+  login: required
+
+# none limited file
+- url: /feed(/.+/.+)?
+  script: feed.py
+
+- url: /testpage
+  script: testpage.py
+
+- url: /(|index|tutorial[1-3]?|document|help)
+  script: static.py
+

@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+  <title>FeedbySelectors{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" />
+  <link rel="stylesheet" href="/stylesheets/main.css" type="css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="fill">
+      <div class="container">
+        <h1><a class="brand" href="/">FeedbySelectors</a></h1>
+        <ul class="nav">
+          <li><a href="/mypage">マイページ</a></li>
+          <li><a href="/log">マイログ</a></li>
+          <li><a href="/testpage">テストページ</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div id="contain">{% block contain %}
+    Body
+{% endblock %}  </div>
+  <ul id="footer">
+    {% block tutorial %}<li><a href="https://github.com/poochin/feedbyselectors/wiki/Tutorial">チュートリアル</a></li>{% endblock %}
+    {% block document %}<li><a href="https://github.com/poochin/feedbyselectors/wiki/Document">ドキュメント</a></li>{% endblock %}
+    {% block help %}<li><a href="https://github.com/poochin/feedbyselectors/wiki/Help">HELP</a></li>{% endblock %}
+    {% block github %}<li><a href="http://github.com/poochin/feedselectors"></li>{% endblock %}
+    {% block twitter %}{% endblock %}
+  </ul>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends 'custom.html' %}
+
+{% block contain %}
+  <div class="container">
+    <div class="row">
+      <div class="offset1 span14">
+        <table>
+          <tr>
+            <th>Feed name</th>
+            <th>Date</th>
+            <th>Messages</th>
+          </tr>
+          {% for log in logs %}
+          <tr>
+            <td>{{ log.feedname }}</td>
+            <td>{{ log.time }}</td>
+            <td>
+            {% ifequal log.type 0 %}Success:{% endifequal %}
+            {% ifequal log.type 1 %}Info:{% endifequal %}
+            {% ifequal log.type 2 %}Warning:{% endifequal %}
+            {% ifequal log.type 3 %}Error:{% endifequal %}
+            {{ log.message }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
