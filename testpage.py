@@ -26,49 +26,7 @@ from google.appengine.ext.webapp import template
 from lib.BeautifulSoup import BeautifulSoup as Soup
 from lib.soupselect import select
 from lib import common
-
-
-# このページで探索対象として使用する html
-# 外部の html を読み込むようにはしない
-# TODO: 子孫セレクタと子セレクタの違いを判別させられるようなコードを追加する
-html = '''\
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
-        <title>The title</title>
-        <link rel="stylesheet" href="main.css" type="text/css"/>
-    </head>
-    <body>
-        <h1>Test Page</h1>
-        <nav>
-            <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/about.html">About</a></li>
-                <li><a href="/download.html">Download</a></li>
-            </ul>
-        </nav>
-        <div id="contain">
-            <h2>最新の更新情報</h2>
-            <div class="section">
-                <h3><a href="/board.php?date=1970-01-01">Hello, World!</a></h3>
-                <p class="desc">The Unix epoch time starting.</p>
-            </div>
-            <div class="section">
-                <h3><a href="/board.php?date=1995-09-24">Releasing Windows 95.</a></h3>
-                <p class="desc">Microsoft Corp. released Windows95.</p>
-            </div>
-            <div class="section">
-                <h3><a href="/board.php?date=2011-10-04">Publish iPhone 4S</a></h3>
-                <p class="desc">Apple Inc. Published iPhone 4S.</p>
-            </div>
-        </div>
-        <footer>
-            <address>@poochin</address>
-        </footer>
-    </body>
-</html>
-'''
+from lib import defines
 
 
 class TestpageHandler(webapp.RequestHandler):
@@ -77,7 +35,7 @@ class TestpageHandler(webapp.RequestHandler):
     def get(self):
         ''' Testpage を標準状態で出力します '''
 
-        template_values = {'code': escape(html),}
+        template_values = {'code': escape(defines.defaulttesthtml),}
         path = os.path.join(os.path.dirname(__file__), 'templates/testpage.html')
 
         self.response.out.write(template.render(path, template_values))
@@ -90,10 +48,10 @@ class TestpageHandler(webapp.RequestHandler):
         raw_attr = self.request.get('attr')
         attr = escape(raw_attr, '"')
 
-        soup = Soup(html)
+        soup = Soup(defines.defaulttesthtml)
         texts = common.selectortext(soup, selector, attr)
         
-        template_values = {'code': escape(html),
+        template_values = {'code': escape(defines.defaulttesthtml),
             'selector': selector, 'attr': attr,
             'results': texts,}
         path = os.path.join(os.path.dirname(__file__), 'templates/testpage.html')

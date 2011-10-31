@@ -1,7 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import re
+
 from google.appengine.ext import db
+from google.appengine.ext.db import polymodel
+
+import defines
 
 
 class User(db.Model):
@@ -14,29 +19,51 @@ class Log(db.Model):
         User の子エンティティ
         ユーザのログを保管します
     '''
+ 
+    def valid_feedname(name):
+        if name == None: return
+        if len(name) == 0: return
+    
+        if re.search('[^A-Z^a-z]', name):
+            raise ValueError
+
     _type_success = 0
     _type_info = 1
     _type_worning = 2
     _type_error = 3
 
-    _savecount = 5
+    _savecount = 100
 
-    feedname = db.StringProperty()
-    type = db.IntegerProperty()
+    feedname = db.StringProperty(validator=valid_feedname)
+    type = db.IntegerProperty(choices=[0, 1, 2, 3])
     message = db.StringProperty(default="")
     time = db.DateTimeProperty(auto_now=True)
 
 
-class CustomFeed(db.Model):
+class AbstractCustomFeed(polymodel.PolyModel):
     '''
-        User の子エンティティ
+        カスタムフィードの抽象型
         ユーザのカスタムフィードを保管します
     '''
-    name = db.StringProperty()
+    def valid_feedname(name):
+        if name == None: return
+        if len(name) == 0: return
+    
+        if re.search('[^A-Z^a-z]', name):
+            raise ValueError
+
+    def valid_url(url):
+        if url == None: return
+        if len(url) == 0: return
+    
+        if not re.match('https?://', url):
+            raise ValueError
+
+    name = db.StringProperty(validator=valid_feedname)
     time = db.DateTimeProperty(auto_now=True)
 
     rss_title = db.StringProperty(default="")
-    rss_link = db.StringProperty(default="")
+    rss_link = db.StringProperty(default="", validator=valid_url)
     rss_description = db.StringProperty(default="")
 
     item_title_enable = db.BooleanProperty(default=True)
@@ -53,28 +80,49 @@ class CustomFeed(db.Model):
     item_date_attr = db.StringProperty(default="")
 
     def _updatebydict(self, dict):
-        self.rss_title = dict['rss_title']
-        self.rss_link = dict['rss_link']
-        self.rss_description = dict['rss_description']
+        for key in self.properties():
+            if dict.has_key(key):
+                if isinstance(getattr(self, key), bool):
+                    setattr(self, key, bool(dict[key]))
+                else:
+                    setattr(self, key, dict[key])
 
-        self.item_title_enable = bool(dict['item_title_enable'])
-        self.item_title_selector = dict['item_title_selector']
-        self.item_title_attr = dict['item_title_attr']
-        self.item_link_enable = bool(dict['item_link_enable'])
-        self.item_link_selector = dict['item_link_selector']
-        self.item_link_attr = dict['item_link_attr']
-        self.item_description_enable = bool(dict['item_description_enable'])
-        self.item_description_selector = dict['item_description_selector']
-        self.item_description_attr = dict['item_description_attr']
-        self.item_date_enable = bool(dict['item_date_enable'])
-        self.item_date_selector = dict['item_date_selector']
-        self.item_date_attr = dict['item_date_attr']
+
+class CustomFeed(AbstractCustomFeed):
+    '''
+        カスタムフィード
+        ユーザのフィード設定を保管します
+    '''
+    pass
+
+
+class CustomTest(AbstractCustomFeed):
+    '''
+        カスタムテスト
+        ユーザによるテストの設定を保管します
+    '''
+    def valid_customdata(data):
+        if data == None: return
+    
+        if len(data) >= (50 * 1024):
+            raise ValueError
+
+    data = db.TextProperty(default=defines.defaulttesthtml, validator=valid_customdata)
 
 
 class FeedData(db.Model):
     '''
         カスタムフィードを元に作成したフィードのデータ
     '''
-    feed = db.TextProperty()
+    def valid_feed(f):
+        if f == None: return
+        if len(f) == 0: return
+
+        if len(f) >= (100 * 1024):
+            raise ValueError
+
+    atom = db.TextProperty(default="", validator=valid_feed)
+    rss = db.TextProperty(default="", validator=valid_feed)
+#     rdf = db.TextProperty(default="", validator=valid_feed)
     time = db.DateTimeProperty(auto_now=True)
 

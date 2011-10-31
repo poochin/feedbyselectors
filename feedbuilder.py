@@ -23,7 +23,6 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
 from google.appengine.api.urlfetch import fetch
-from django.utils import feedgenerator
 
 from lib.BeautifulSoup import BeautifulSoup as Soup
 from lib.dateutil.parser import parse as dateparser
@@ -34,20 +33,6 @@ from lib import common
 
 static_offset = 0  # mydb.User を参照するための offset の位置です
 
-
-def buildfeed(author, rss_title, rss_link, rss_description, items):
-    ''' django のライブラリを利用して Atom Feed を作成します。 '''
-    fg = feedgenerator.Atom1Feed(
-        title=rss_title,
-        link=rss_link,
-        description=rss_description,
-        language=u'ja',
-        author_name=author)
-
-    for item in items:
-        fg.add_item(**item)
-
-    return fg.writeString('UTF-8')
 
 def getcrawluser():
     ''' クロールすべきユーザを取得する '''
@@ -90,18 +75,22 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     item_titles = common.selectortext(soup, cf.item_title_selector, cf.item_title_attr)
                     dlist_title = [('title', t) for t in item_titles]
                     dict_compilelist.append(dlist_title)
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Title 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
                 if cf.item_link_enable:
                     item_links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
                     dlist_link = [('link', l) for l in item_links]
                     dict_compilelist.append(dlist_link)
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Link 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
                 if cf.item_description_enable:
                     item_descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
                     dlist_description = [('description', d) for d in item_descriptions]
                     dict_compilelist.append(dlist_description)
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Description 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
                 if cf.item_date_enable:
                     item_dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
                     dlist_date = [('pubdate', dateparser(d)) for d in item_dates]
                     dict_compilelist.append(dlist_date)
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Date 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
 
                 # buildfeed 関数に引き渡す items リスト
                 items = []
@@ -119,7 +108,8 @@ class FeedbuilderHandler(webapp.RequestHandler):
                 feeddata = mydb.FeedData.get_by_key_name(cf.name, parent=cf)
                 if not feeddata:
                     feeddata = mydb.FeedData(parent=cf, key_name=cf.name)
-                feeddata.feed = buildfeed('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
+                feeddata.atom = common.buildfeed('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
+                feeddata.rss = common.buildrss('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
 
                 if not feeddata.put():
                     raise

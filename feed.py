@@ -47,7 +47,7 @@ class FeedHandler(webapp.RequestHandler):
             common.error(self, 404, 'Feed data is not found.')
             return
 
-        self.response.out.write(feed.feed)
+        self.response.out.write(feed.rss)
 
 
 def main():

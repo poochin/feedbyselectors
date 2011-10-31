@@ -60,7 +60,7 @@ class NewfeedHandler(webapp.RequestHandler):
         user = common.currentuser()
         
         newfeedname = self.request.get('name')
-        if re.match('[^A-Z^a-z]', newfeedname):
+        if re.search('[^A-Z^a-z]', newfeedname) and False:
             common.error(self, 400, "無効なフィード名です。")
             return
         
@@ -68,7 +68,8 @@ class NewfeedHandler(webapp.RequestHandler):
             common.error(self, 409, "ページが既に存在します。")
             return
 
-        f = mydb.CustomFeed(parent=user, key_name=newfeedname, name=newfeedname)
+        f = mydb.CustomFeed(parent=user, key_name=newfeedname)
+        f.name=newfeedname
         if f.put():
             self.redirect("/mypage")
         else:

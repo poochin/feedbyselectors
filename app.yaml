@@ -26,6 +26,10 @@ handlers:
   script: log.py
   login: required
 
+- url: /customtest(/.+)?
+  script: customtest.py
+  login: required
+
 # none limited file
 - url: /feed(/.+/.+)?
   script: feed.py
@@ -33,6 +37,9 @@ handlers:
 - url: /testpage
   script: testpage.py
 
-- url: /(|index|tutorial[1-3]?|document|help)
+- url: /testcase1
+  script: testcase.py
+
+- url: /(|index)
   script: static.py
 
