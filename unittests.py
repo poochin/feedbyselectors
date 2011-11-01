@@ -81,11 +81,6 @@ class GAETestBase(unittest.TestCase):
         os.environ["AUTH_DOMAIN"] = AUTH_DOMAIN
         os.environ["USER_EMAIL"] = LOGGED_IN_USER
 
-# User
-# Log
-# CustomFeed
-# CustomTest
-# FeedData
 
 class UserTest(GAETestBase):
     ''' ユーザの登録テスト '''
@@ -174,12 +169,12 @@ class FeedDataTest(GAETestBase):
  
         items = [dict([('title', t), ('link', l), ('description', d)]) for t, l, d in zip(titles, links, descriptions)]
 
-        # rdf = common.buildrdf('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
-        # rss = common.buildrss('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
-        atom = common.buildfeed('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
-
-        # fd = mydb.FeedData(parent=feed, atom=atom, rss=rss)  # rss の部分が文字コード関係で上手くいかない
-        fd = mydb.FeedData(parent=feed, atom=atom)
+        fd = mydb.FeedData(parent=feed)
+        fd.atom = common.buildfeed('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
+        if common.django.VERSION < (1, 1, 5):
+            # django <= 1.1.4 でなければ RSS と RDF の作成時にエラーが出る
+            fd.rss = common.buildrss('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
+            fd.rdf = common.buildrdf('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
         fd.put()
 
         self.assertEqual(1, mydb.FeedData.all().ancestor(user).count())
@@ -187,4 +182,3 @@ class FeedDataTest(GAETestBase):
 
 if __name__ == '__main__':
     unittest.main()
-
