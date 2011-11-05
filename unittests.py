@@ -57,6 +57,14 @@ AUTH_DOMAIN = "gmail.com"
 LOGGED_IN_USER = "test@example.com"
 
 
+posts = {'name': u'test', 'data': defines.defaulttesthtml,
+    u'rss_title': u'Test data', u'rss_link': u'http://example.com/', u'rss_description': u'Description', 
+    'item_title_enable': True, 'item_title_selector': u'.section h3', 'item_title_attr': u'',
+    'item_link_enable': True, 'item_link_selector': u'.section h3 a', 'item_link_attr': u'href',
+    'item_description_enable': True, 'item_description_selector': u'.section .desc', 'item_description_attr': u'',
+    'item_date_enable': True, 'item_date_selector': u'.date', 'item_date_attr': u''}
+
+
 # 単体テストのベースクラス
 class GAETestBase(unittest.TestCase):
 
@@ -107,20 +115,15 @@ class CustomFeedTest(GAETestBase):
         user = mydb.User(user=users.User('test@gmail.com'))
         user.put()
 
-        udict = {'name': u'test', 'rss_title': u'テスト',
-            'rss_link': u'http://example.com/', 'rss_description': u'test desc',
-            'item_title_enable': True, 'item_title_selector': u'.section h3', 'item_title_attr': u'',
-            'item_link_enable': True, 'item_link_selector': u'.section h3 a', 'item_link_attr': u'href',
-            'item_description_enable': True, 'item_description_selector': u'.section .desc', 'item_description_attr': u'',
-            'item_date_enable': True, 'item_date_selector': u'.date', 'item_date_attr': u'',
-        }
         feed = mydb.CustomFeed(parent=user, name=u'test')
-        feed._updatebydict(udict)
+        feed.setbypost(posts)
         feed.put()
 
         cf = mydb.CustomFeed.all().ancestor(user).get()
-        feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if udict.has_key(key))
-        self.assertEqual(udict, feeddict)
+        feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if posts.has_key(key))
+
+        d = dict((key, posts[key]) for key in cf.properties() if posts.has_key(key))
+        self.assertEqual(d, feeddict)
 
 
 class CustomTestTest(GAETestBase):
@@ -129,20 +132,14 @@ class CustomTestTest(GAETestBase):
         user = mydb.User(user=users.User('test@gmail.com'))
         user.put()
 
-        udict = {'name': u'test', 'rss_link': u'http://example.com/', 'data': defines.defaulttesthtml,
-            'item_title_enable': True, 'item_title_selector': u'.section h3', 'item_title_attr': u'',
-            'item_link_enable': True, 'item_link_selector': u'.section h3 a', 'item_link_attr': u'href',
-            'item_description_enable': True, 'item_description_selector': u'.section .desc', 'item_description_attr': u'',
-            'item_date_enable': True, 'item_date_selector': u'.date', 'item_date_attr': u'',
-        }
         feed = mydb.CustomTest(parent=user, name=u'test')
-        feed._updatebydict(udict)
+        feed.setbypost(posts)
         feed.put()
 
         cf = mydb.CustomFeed.all().ancestor(user).get()
-        feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if udict.has_key(key))
+        feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if posts.has_key(key))
 
-        self.assertEqual(udict, feeddict)
+        self.assertEqual(posts, feeddict)
 
 
 class FeedDataTest(GAETestBase):
@@ -151,30 +148,26 @@ class FeedDataTest(GAETestBase):
         user = mydb.User(user=users.User('test@gmail.com'))
         user.put()
 
-        udict = {'name': u'test', 'rss_title': u'test',
-            'rss_link': u'http://example.com/', 'rss_description': u'test desc',
-            'item_title_enable': True, 'item_title_selector': u'.section h3', 'item_title_attr': u'',
-            'item_link_enable': True, 'item_link_selector': u'.section h3 a', 'item_link_attr': u'href',
-            'item_description_enable': True, 'item_description_selector': u'.section .desc', 'item_description_attr': u'',
-            'item_date_enable': True, 'item_date_selector': u'.date', 'item_date_attr': u'',
-        }
         feed = mydb.CustomFeed(parent=user, name=u'test')
-        feed._updatebydict(udict)
+        feed.setbypost(posts)
         feed.put()
 
         soup = Soup(defines.defaulttesthtml)
-        titles = common.selectortext(soup, udict['item_title_selector'], udict['item_title_attr'])
-        links = common.selectortext(soup, udict['item_link_selector'], udict['item_link_attr'])
-        descriptions = common.selectortext(soup, udict['item_description_selector'], udict['item_description_attr'])
+        titles = common.selectortext(soup, posts['item_title_selector'], posts['item_title_attr'])
+        links = common.selectortext(soup, posts['item_link_selector'], posts['item_link_attr'])
+        descriptions = common.selectortext(soup, posts['item_description_selector'], posts['item_description_attr'])
  
         items = [dict([('title', t), ('link', l), ('description', d)]) for t, l, d in zip(titles, links, descriptions)]
+        rss_title = posts['rss_title'].encode('UTF-8')
+        rss_link = posts['rss_link'].encode('UTF-8')
+        rss_description = posts['rss_description'].encode('UTF-8')
 
         fd = mydb.FeedData(parent=feed)
-        fd.atom = common.buildfeed('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
+        fd.atom = common.buildfeed('Anon', rss_title, rss_link, rss_description, items)
         if common.django.VERSION < (1, 1, 5):
             # django <= 1.1.4 でなければ RSS と RDF の作成時にエラーが出る
-            fd.rss = common.buildrss('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
-            fd.rdf = common.buildrdf('Anon', udict['rss_title'], udict['rss_link'], udict['rss_description'], items)
+            fd.rss = common.buildrss('Anon', posts['rss_title'], posts['rss_link'], posts['rss_description'], items)
+            fd.rdf = common.buildrdf('Anon', posts['rss_title'], posts['rss_link'], posts['rss_description'], items)
         fd.put()
 
         self.assertEqual(1, mydb.FeedData.all().ancestor(user).count())
@@ -182,3 +175,4 @@ class FeedDataTest(GAETestBase):
 
 if __name__ == '__main__':
     unittest.main()
+
