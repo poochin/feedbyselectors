@@ -163,7 +163,7 @@ class FeedDataTest(GAETestBase):
         rss_description = posts['rss_description'].encode('UTF-8')
 
         fd = mydb.FeedData(parent=feed)
-        fd.atom = common.buildfeed('Anon', rss_title, rss_link, rss_description, items)
+        fd.atom = common.buildatom('Anon', rss_title, rss_link, rss_description, items)
         if common.django.VERSION < (1, 1, 5):
             # django <= 1.1.4 でなければ RSS と RDF の作成時にエラーが出る
             fd.rss = common.buildrss('Anon', posts['rss_title'], posts['rss_link'], posts['rss_description'], items)

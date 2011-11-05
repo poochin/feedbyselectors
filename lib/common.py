@@ -38,7 +38,7 @@ def selectortext(soup, selector, attr):
         return [el.text for el in elms]
 
 
-def buildfeed(author, rss_title, rss_link, rss_description, items):
+def buildatom(author, rss_title, rss_link, rss_description, items):
     ''' django のライブラリを利用して Atom Feed を作成します。 '''
     fg = feedgenerator.Atom1Feed(
         title=rss_title,

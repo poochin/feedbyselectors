@@ -115,9 +115,13 @@ class FeedbuilderHandler(webapp.RequestHandler):
                 if not feeddata:
                     feeddata = mydb.FeedData(parent=cf, key_name=cf.name)
 
-                feeddata.atom = common.buildfeed('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
-                feeddata.rss = common.buildrss('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
-                feeddata.rdf = common.buildrdf('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
+                rss_title = cf.rss_title.encode('UTF-8')
+                rss_link = cf.rss_link.encode('UTF-8')
+                rss_description = cf.rss_description.encode('UTF-8')
+
+                feeddata.atom = common.buildatom('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
+                feeddata.rss = common.buildrss('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
+                feeddata.rdf = common.buildrdf('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
 
                 if not feeddata.put():
                     raise ValueError  # TODO: save Error
