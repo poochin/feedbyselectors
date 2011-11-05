@@ -66,6 +66,8 @@ class FeedbuilderHandler(webapp.RequestHandler):
 
         customfeeds = mydb.CustomFeed.all().ancestor(user).order('time').fetch(1000)
         for cf in customfeeds:
+            if not cf.rss_link:
+                continue
             try:
                 ref = fetch(cf.rss_link).content
                 soup = Soup(ref)
