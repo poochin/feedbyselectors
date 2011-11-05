@@ -15,15 +15,15 @@
             </tr>
             <tr>
               <td>Feedのタイトル</td>
-              <td><input type="text" name="rss_title" value="{{ rss_title }}" /></td>
+              <td><input type="text" name="rss_title" value="{{ cf.rss_title|escape }}" /></td>
             </tr>
             <tr>
               <td>Feed元のLink</td>
-              <td><input type="text" name="rss_link" value="{{ rss_link }}" /></td>
+              <td><input type="text" name="rss_link" value="{{ cf.rss_link|escape }}" /></td>
             </tr>
             <tr>
               <td>Feedの説明(Description)</td>
-              <td><input type="text" name="rss_description" value="{{ rss_description }}" /></td>
+              <td><input type="text" name="rss_description" value="{{ cf.rss_description|escape }}" /></td>
           </table>
         </fieldset>
       </div>
@@ -37,24 +37,104 @@
               <th class="green">属性</th>
             </tr>
             <tr>
-              <td><label style="float: none;"><input type="checkbox" name="item_title_enable" {% if item_title_enable %}checked {% endif %}/> タイトル(Title)</label></td>
-              <td><input type="text" name="item_title_selector" value="{{ item_title_selector }}" {% if not item_title_enable %}readonly {% endif %}/></td>
-              <td><input type="text" name="item_title_attr" value="{{ item_title_attr }}" {% if not item_title_enable %}readonly {% endif %}/></td>
+              <td>
+                <label style="float: none;">
+                  {% if cf.item_title_enable %}
+                  <input type="checkbox" name="item_title_enable" checked /> タイトル(Title)
+                  {% else %}
+                  <input type="checkbox" name="item_title_enable" /> タイトル(Title)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if cf.item_title_enable %}
+                <input type="text" name="item_title_selector" value="{{ cf.item_title_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_title_selector" value="{{ cf.item_title_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if cf.item_title_enable %}
+                <input type="text" name="item_title_attr" value="{{ cf.item_title_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_title_attr" value="{{ cf.item_title_attr|escape }}" readonly/>
+                {% endif %}
+              </td>
             </tr>
             <tr>
-              <td><label style="float: none;"><input type="checkbox" name="item_link_enable" {% if item_link_enable %}checked {% endif %}> リンク(Link)</label></td>
-              <td><input type="text" name="item_link_selector" value="{{ item_link_selector }}" {% if not item_link_enable %}readonly {% endif %}/></td>
-              <td><input type="text" name="item_link_attr" value="{{ item_link_attr }}" {% if not item_link_enable %}readonly {% endif %}/></td>
+              <td>
+                <label style="float: none;">
+                  {% if cf.item_link_enable %}
+                  <input type="checkbox" name="item_link_enable" checked /> リンク(Link)
+                  {% else %}
+                  <input type="checkbox" name="item_link_enable"> リンク(Link)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if cf.item_link_enable %}
+                <input type="text" name="item_link_selector" value="{{ cf.item_link_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_link_selector" value="{{ cf.item_link_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if cf.item_link_enable %}
+                <input type="text" name="item_link_attr" value="{{ cf.item_link_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_link_attr" value="{{ cf.item_link_attr|escape }}" readonly />
+                {% endif %}
+              </td>
             </tr>
             <tr>
-              <td><label style="float: none;"><input type="checkbox" name="item_description_enable" {% if item_description_enable %}checked {% endif %}> 概要(Description)</label></td>
-              <td><input type="text" name="item_description_selector" value="{{ item_description_selector }}" {% if not item_description_enable %}readonly {% endif %}/></td>
-              <td><input type="text" name="item_description_attr" value="{{ item_description_attr}}" {% if not item_description_enable %}readonly {% endif %}/></td>
+              <td>
+                <label style="float: none;">
+                  {% if cf.item_description_enable %}
+                  <input type="checkbox" name="item_description_enable" checked /> 概要(Description)
+                  {% else %}
+                  <input type="checkbox" name="item_description_enable" /> 概要(Description)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if cf.item_description_enable %}
+                <input type="text" name="item_description_selector" value="{{ cf.item_description_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_description_selector" value="{{ cf.item_description_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if cf.item_description_enable %}
+                <input type="text" name="item_description_attr" value="{{ cf.item_description_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_description_attr" value="{{ cf.item_description_attr|escape }}" readonly />
+                {% endif %}
+              </td>
             </tr>
             <tr>
-              <td><label style="float: none;"><input type="checkbox" name="item_date_enable" {% if item_date_enable %}checked {% endif %}> 時刻</label></td>
-              <td><input type="text" name="item_date_selector" value="{{ item_date_selector }}" {% if not item_date_enable %}readonly {% endif %}/></td>
-              <td><input type="text" name="item_date_attr" value="{{ item_date_attr}}" {% if not item_date_enable %}readonly {% endif %}/></td>
+              <td>
+                <label style="float: none;">
+                  {% if cf.item_date_enable %}
+                  <input type="checkbox" name="item_date_enable" checked /> 時刻
+                  {% else %}
+                  <input type="checkbox" name="item_date_enable" /> 時刻
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if cf.item_date_enable %}
+                <input type="text" name="item_date_selector" value="{{ cf.item_date_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_date_selector" value="{{ cf.item_date_selector|escape }}" readonly /> 
+                {% endif %}
+              </td>
+              <td>
+                {% if cf.item_date_enable %}
+                <input type="text" name="item_date_attr" value="{{ cf.item_date_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_date_attr" value="{{ cf.item_date_attr|escape }}" readonly />
+                {% endif %}
+              </td>
             </tr>
           </table>
         </fieldset>

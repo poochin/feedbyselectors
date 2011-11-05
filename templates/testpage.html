@@ -16,8 +16,8 @@
             </tr>
             <tr>
               <td>実行テスト用</td>
-              <td><input type="text" name="selector" value="{{ selector }}"/></td>
-              <td><input type="text" name="attr" value="{{ attr }}" /></td>
+              <td><input type="text" name="selector" value="{{ posts.selector|escape }}"/></td>
+              <td><input type="text" name="attr" value="{{ posts.attr|escape }}" /></td>
             </tr>
           </table>
         </fieldset>
@@ -38,7 +38,7 @@
     </div>
     <div class="row">
       <p class="span2 offset1">探索対象のHTML</p>
-      <div class="span12 testcode">{{ code }}</div>
+      <div class="span12 testcode">{{ code|escape }}</div>
     </div>
   </div>
 {% endblock %}
