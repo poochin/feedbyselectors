@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import django
 from google.appengine.api.users import User
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
@@ -79,5 +80,6 @@ def buildrdf(author, rss_title, rss_link, rss_description, items):
         fg.add_item(**item)
 
     return fg.writeString('UTF-8')
+
 
 

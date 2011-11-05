@@ -39,13 +39,13 @@ def getcrawluser():
     ''' クロールすべきユーザを取得する '''
     global static_offset
 
-    static_offset += 1
     user = mydb.User.all().fetch(1, static_offset)
 
     if not user:
         static_offset = 0
         return None
 
+    static_offset += 1
     return user[0]
 
 
@@ -77,7 +77,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_title)
 
                     message = u"Title 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_link_enable:
                     item_links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
@@ -85,7 +85,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_link)
 
                     message = u"Link 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_description_enable:
                     item_descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
@@ -93,7 +93,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_description)
 
                     message = u"Description 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_date_enable:
                     item_dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
@@ -101,7 +101,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_date)
 
                     message = u"Date 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
 
                 items = []
                 for dl in zip(*dict_compilelist):
@@ -122,14 +122,14 @@ class FeedbuilderHandler(webapp.RequestHandler):
 
             except:
                 message = u"何かエラーが発生しました。"
-                log = mydb.Log(feedname=cf.name, type=mydb.Log._type_error, message=message, parent=user)
+                log = mydb.Log(feedname=cf.name, type=mydb.Log._types['error'], message=message, parent=user)
                 if not log.put():
                     pass  # すみません。 もうどうしようもないです
                 raise  # 適切なエラーを定義して正しく登らせるようにする
 
             else:
                 message = u"カスタムフィードの作成に成功しました。"
-                log = mydb.Log(feedname=cf.name, type=mydb.Log._type_success, message=message, parent=user)
+                log = mydb.Log(feedname=cf.name, type=mydb.Log._types['success'], message=message, parent=user)
                 if not log.put():
                     pass  # ログが保存出来なかった場合はどうしようか考えていません。
 

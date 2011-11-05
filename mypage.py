@@ -55,26 +55,19 @@ class NewfeedHandler(webapp.RequestHandler):
 
     def post(self):
         ''' 新カスタムフィードの更新の申請'''
-        import re
-
         user = common.currentuser()
-        
-        newfeedname = self.request.get('name')
-        if re.search('[^A-Z^a-z]', newfeedname) and False:
-            common.error(self, 400, "無効なフィード名です。")
-            return
-        
+
+        newfeedname = self.request.POST['name']
         if mydb.CustomFeed.get_by_key_name(newfeedname, parent=user):
             common.error(self, 409, "ページが既に存在します。")
             return
 
-        f = mydb.CustomFeed(parent=user, key_name=newfeedname)
-        f.name=newfeedname
-        if f.put():
-            self.redirect("/mypage")
-        else:
+        cf = mydb.CustomFeed(parent=user, key_name=newfeedname, name=newfeedname)
+        if not cf.put():
             common.error(self, 400, "フィードの作成に失敗しました。")
             return
+
+        self.redirect("/mypage")
 
 
 class DeletefeedHandler(webapp.RequestHandler):
@@ -86,14 +79,14 @@ class DeletefeedHandler(webapp.RequestHandler):
     def post(self):
         user = common.currentuser()
 
-        feedname = self.request.get('name')
-        f = mydb.CustomFeed.get_by_key_name(feedname, parent=user)
-        if not f:
+        feedname = self.request.POST['name']
+        cf = mydb.CustomFeed.get_by_key_name(feedname, parent=user)
+        if not cf:
             common.error(self, 400, "ページは存在しません。")
             return
 
-        f.delete()
-        if f.is_saved():
+        cf.delete()
+        if cf.is_saved():
             common.error(self, 400, "削除に失敗しました。")
             return
 

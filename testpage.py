@@ -35,7 +35,7 @@ class TestpageHandler(webapp.RequestHandler):
     def get(self):
         ''' Testpage を標準状態で出力します '''
 
-        template_values = {'code': escape(defines.defaulttesthtml),}
+        template_values = {'code': defines.defaulttesthtml}
         path = os.path.join(os.path.dirname(__file__), 'templates/testpage.html')
 
         self.response.out.write(template.render(path, template_values))
@@ -43,17 +43,12 @@ class TestpageHandler(webapp.RequestHandler):
     def post(self):
         ''' Testpage についてセレクタと属性の入力があった場合 '''
 
-        raw_selector = self.request.get('selector')
-        selector = escape(raw_selector, '"')
-        raw_attr = self.request.get('attr')
-        attr = escape(raw_attr, '"')
+        posts = self.request.POST
 
         soup = Soup(defines.defaulttesthtml)
-        texts = common.selectortext(soup, selector, attr)
-        
-        template_values = {'code': escape(defines.defaulttesthtml),
-            'selector': selector, 'attr': attr,
-            'results': texts,}
+        texts = common.selectortext(soup, posts['selector'], posts['attr'])
+
+        template_values = {'code': defines.defaulttesthtml, 'posts': posts, 'results': texts}
         path = os.path.join(os.path.dirname(__file__), 'templates/testpage.html')
 
         self.response.out.write(template.render(path, template_values))

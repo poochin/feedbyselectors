@@ -29,15 +29,11 @@ class Log(db.Model):
         if not re.search('^[A-Za-z]+$', name):
             raise ValueError
 
-    _type_success = 0
-    _type_info = 1
-    _type_worning = 2
-    _type_error = 3
-
+    _types = {'success': 0, 'info': 1, 'worning': 2, 'error': 3}
     _savecount = 100
 
     feedname = db.StringProperty(validator=valid_feedname)
-    type = db.IntegerProperty(choices=[0, 1, 2, 3])
+    type = db.IntegerProperty(choices=_types)
     message = db.StringProperty(default="")
     time = db.DateTimeProperty(auto_now=True)
 

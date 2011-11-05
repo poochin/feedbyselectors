@@ -103,7 +103,7 @@ class LogTest(GAETestBase):
         user = mydb.User(user=users.User('test@gmail.com'))
         user.put()
 
-        log = mydb.Log(parent=user, feedname='test', type=mydb.Log._type_success, message=u'テスト')
+        log = mydb.Log(parent=user, feedname='test', type=mydb.Log._types['success'], message=u'テスト')
         log.put()
 
         self.assertEqual(1, mydb.Log.all().ancestor(user).count())
