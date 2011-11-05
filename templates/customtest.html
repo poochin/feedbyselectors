@@ -1,0 +1,180 @@
+{% extends "custom.html" %}
+
+{% block title %}( - Test page){% endblock %}
+
+{% block contain %}
+  <h2>カスタムテスト</h2>
+  <div class="container">
+    <form action="/customtest/url" method="post">
+      <h3>URL のセット</h3>
+      <div class="row">
+        <div class="span3"><label>取得する URL</label></div>
+        <div class="span5"><input type="text" name="rss_link" value="{{ ct.rss_link }}"/></div>
+        <div class="span2"><input type="submit" value="Save" /></div>
+      </div>
+    </form>
+    <form action="/customtest" method="post">
+      <h3>取得するアイテムの設定</h3>
+      <div class="row">
+        <div class="span12 offset1">
+          <table class="zebra-striped">
+            <tr>
+              <th class="red">種別</th>
+              <th class="blue">セレクタ</th>
+              <th class="green">属性</th>
+            </tr>
+            <tr>
+              <td>
+                <label style="float: none;">
+                  {% if ct.item_title_enable %}
+                  <input type="checkbox" name="item_title_enable" checked /> タイトル(Title)
+                  {% else %}
+                  <input type="checkbox" name="item_title_enable" /> タイトル(Title)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if ct.item_title_enable %}
+                <input type="text" name="item_title_selector" value="{{ ct.item_title_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_title_selector" value="{{ ct.item_title_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if ct.item_title_enable %}
+                <input type="text" name="item_title_attr" value="{{ ct.item_title_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_title_attr" value="{{ ct.item_title_attr|escape }}" readonly />
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label style="float: none;">
+                  {% if ct.item_link_enable %}
+                  <input type="checkbox" name="item_link_enable" checked /> リンク(Link)
+                  {% else %}
+                  <input type="checkbox" name="item_link_enable" /> リンク(Link)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if ct.item_link_enable %}
+                <input type="text" name="item_link_selector" value="{{ ct.item_link_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_link_selector" value="{{ ct.item_link_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if ct.item_link_enable %}
+                <input type="text" name="item_link_attr" value="{{ ct.item_link_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_link_attr" value="{{ ct.item_link_attr|escape }}" readonly />
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label style="float: none;">
+                  {% if ct.item_description_enable %}
+                  <input type="checkbox" name="item_description_enable" checked /> 概要(Description)
+                  {% else %}
+                  <input type="checkbox" name="item_description_enable" /> 概要(Description)
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if ct.item_description_enable %}
+                <input type="text" name="item_description_selector" value="{{ ct.item_description_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_description_selector" value="{{ ct.item_description_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if ct.item_description_enable %}
+                <input type="text" name="item_description_attr" value="{{ ct.item_description_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_description_attr" value="{{ ct.item_description_attr|escape }}" readonly />
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label style="float: none;">
+                  {% if ct.item_date_enable %}
+                  <input type="checkbox" name="item_date_enable" checked /> 時刻
+                  {% else %}
+                  <input type="checkbox" name="item_date_enable" /> 時刻
+                  {% endif %}
+                </label>
+              </td>
+              <td>
+                {% if ct.item_date_enable %}
+                <input type="text" name="item_date_selector" value="{{ ct.item_date_selector|escape }}" />
+                {% else %}
+                <input type="text" name="item_date_selector" value="{{ ct.item_date_selector|escape }}" readonly />
+                {% endif %}
+              </td>
+              <td>
+                {% if ct.item_date_enable %}
+                <input type="text" name="item_date_attr" value="{{ ct.item_date_attr|escape }}" />
+                {% else %}
+                <input type="text" name="item_date_attr" value="{{ ct.item_date_attr|escape }}" readonly />
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span2 offset11">
+          <input type="submit" value="Test" />
+        </div>
+      </div>
+    </form>
+    <h3>取得結果</h3>
+    <h4>Title:</h4>
+    {% if texts.titles %}
+    <ul>
+      {% for text in texts.titles %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <h4>Link:</h4>
+    {% if texts.links %}
+    <ul>
+      {% for text in texts.links %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <h4>Description:</h4>
+    {% if texts.descriptions %}
+    <ul>
+      {% for text in texts.descriptions %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <h4>Date:</h4>
+    {% if texts.dates %}
+    <ul>
+      {% for text in texts.dates %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="row">
+      <div class="span2">
+        <p>
+        探索対象のHTML
+        <a style="cursor: pointer; font-size: x-small;" onclick="mh=customdata.style.maxHeight;customdata.style.maxHeight=mh?'':'40em';">高さ調整</a>
+        </p>
+      </div>
+      <div class="span14">
+        <p id="customdata" class="testcode code" style="max-height: 40em; overflow: auto">{{ ct.data|escape }}</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
