@@ -32,20 +32,20 @@ from lib import common
 
 
 static_offset = 0  # mydb.User を参照するための offset の位置です
+user_cursor = None # TODO: Queue.with_cursor が使えないか試してみる
 
 
 def getcrawluser():
     ''' クロールすべきユーザを取得する '''
     global static_offset
+
+    static_offset += 1
     user = mydb.User.all().fetch(1, static_offset)
 
     if not user:
         static_offset = 0
-        user = mydb.User.all().fetch(1, static_offset)
-        if not user:
-            return None
+        return None
 
-    static_offset += 1
     return user[0]
 
 
@@ -75,45 +75,50 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     item_titles = common.selectortext(soup, cf.item_title_selector, cf.item_title_attr)
                     dlist_title = [('title', t) for t in item_titles]
                     dict_compilelist.append(dlist_title)
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Title 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
+
+                    message = u"Title 用の要素が %d 個見つかりました" % (len(dlist_title))
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+
                 if cf.item_link_enable:
                     item_links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
                     dlist_link = [('link', l) for l in item_links]
                     dict_compilelist.append(dlist_link)
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Link 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
+
+                    message = u"Link 用の要素が %d 個見つかりました" % (len(dlist_title))
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+
                 if cf.item_description_enable:
                     item_descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
                     dlist_description = [('description', d) for d in item_descriptions]
                     dict_compilelist.append(dlist_description)
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Description 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
+
+                    message = u"Description 用の要素が %d 個見つかりました" % (len(dlist_title))
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+
                 if cf.item_date_enable:
                     item_dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
                     dlist_date = [('pubdate', dateparser(d)) for d in item_dates]
                     dict_compilelist.append(dlist_date)
-                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=u"Date 用の要素が %d 個見つかりました" % (len(dlist_title)), parent=user).put()
 
-                # buildfeed 関数に引き渡す items リスト
+                    message = u"Date 用の要素が %d 個見つかりました" % (len(dlist_title))
+                    mydb.Log(feedname=cf.name, type=mydb.Log._type_info, message=message, parent=user).put()
+
                 items = []
                 for dl in zip(*dict_compilelist):
-                    d = dict(list(dl))
-                    d.setdefault('title', '')
-                    d.setdefault('link', '')
-                    d.setdefault('description', '')
+                    d = {'title': '', 'link': '', 'description': ''}
+                    d.update(dict(dl))
                     items.append(d)
-
-                rsstitle = cf.rss_title.encode('UTF-8')
-                rsslink = cf.rss_link.encode('UTF-8')
-                rssdesc = cf.rss_description.encode('UTF-8')
 
                 feeddata = mydb.FeedData.get_by_key_name(cf.name, parent=cf)
                 if not feeddata:
                     feeddata = mydb.FeedData(parent=cf, key_name=cf.name)
+
                 feeddata.atom = common.buildfeed('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
                 feeddata.rss = common.buildrss('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
+                feeddata.rdf = common.buildrdf('Anon', rsstitle, rsslink, rssdesc, items).decode('UTF-8')
 
                 if not feeddata.put():
-                    raise
-                    pass  # TODO: save Error
+                    raise ValueError  # TODO: save Error
 
             except:
                 message = u"何かエラーが発生しました。"

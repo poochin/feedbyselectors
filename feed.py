@@ -43,11 +43,20 @@ class FeedHandler(webapp.RequestHandler):
             return
             
         feed = mydb.FeedData.get_by_key_name(feedname, parent=cf)
+
         if not feed:
             common.error(self, 404, 'Feed data is not found.')
             return
 
         self.response.out.write(feed.rss)
+
+    def get(self, uid, feedname, feedtype):
+        if feedtype == 'rdf':
+            pass
+        elif feedtype == 'rdf':
+            pass
+        elif feedtype == 'atom':
+            pass
 
 
 def main():
