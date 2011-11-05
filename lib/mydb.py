@@ -33,7 +33,7 @@ class Log(db.Model):
     _savecount = 100
 
     feedname = db.StringProperty(validator=valid_feedname)
-    type = db.IntegerProperty(choices=_types)
+    type = db.IntegerProperty(choices=_types.values())
     message = db.StringProperty(default="")
     time = db.DateTimeProperty(auto_now=True)
 
