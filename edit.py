@@ -40,21 +40,7 @@ class EditHandler(webapp.RequestHandler):
             common.error(self, 404, "フィードが存在しません。");
             return
 
-        udict = {}
-        for attr in ("rss_title", "rss_link", "rss_description", 
-            "item_title_enable", "item_title_selector", "item_title_attr",
-            "item_link_enable", "item_link_selector", "item_link_attr",
-            "item_description_enable", "item_description_selector", "item_description_attr",
-            "item_date_enable", "item_date_selector", "item_date_attr"):
-            value = getattr(cf, attr, "")
-            if isinstance(value, bool):
-                udict[attr] = value
-            else:
-                udict[attr] = escape(value, '"')
-
-
-        template_values = {'feedname': feedname}
-        template_values.update(udict)
+        template_values = {'feedname': feedname, 'cf': cf}
         path = os.path.join(os.path.dirname(__file__), 'templates/edit.html')
 
         self.response.out.write(template.render(path, template_values))
@@ -68,40 +54,20 @@ class EditHandler(webapp.RequestHandler):
 
         feed = mydb.CustomFeed.get_by_key_name(feedname, parent=u)
         if not feed:
-            self.error(self, 404, 'Feed not found')
+            common.error(self, 404, 'Feed not found')
+            return
 
-        raw_values = {
-            "rss_title": self.request.get('rss_title'),
-            "rss_link": self.request.get('rss_link'),
-            "rss_description": self.request.get('rss_description'),
-            "item_title_enable": self.request.get('item_title_enable'),
-            "item_title_selector": self.request.get('item_title_selector'),
-            "item_title_attr": self.request.get('item_title_attr'),
-            "item_link_enable": self.request.get('item_link_enable'),
-            "item_link_selector": self.request.get('item_link_selector'),
-            "item_link_attr": self.request.get('item_link_attr'),
-            "item_description_enable": self.request.get('item_description_enable'),
-            "item_description_selector": self.request.get('item_description_selector'),
-            "item_description_attr": self.request.get('item_description_attr'),
-            "item_date_enable": self.request.get('item_date_enable'),
-            "item_date_selector": self.request.get('item_date_selector'),
-            "item_date_attr": self.request.get('item_date_attr'),
-        }
-        values = dict([(k, escape(v, '"')) for k, v in raw_values.iteritems()])
+        try:
+            feed.setbypost(self.request.POST)
+        except ValueError:
+            common.error(self, 200, "Invalid input data")
+            return
 
-        feed._updatebydict(raw_values)
-
-        if feed.put():
-            self.redirect('/edit/' + feedname)
-        else:
+        if not feed.put():
             common.error(self, 200, "fail to save.")
             return
 
-        template_values = {'feedname': feedname}
-        template_values.update(values)
-        path = os.path.join(os.path.dirname(__file__), 'templates/edit.html')
-
-        self.response.out.write(template.render(path, template_values))
+        self.redirect('/edit/' + feedname)
 
 
 def main():
