@@ -5,6 +5,8 @@ import re
 
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
+from google.appengine.ext.db import djangoforms
+from google.appengine.api.validation import ValidationError
 
 import defines
 
@@ -24,7 +26,7 @@ class Log(db.Model):
         if name == None: return
         if len(name) == 0: return
     
-        if re.search('[^A-Z^a-z]', name):
+        if not re.search('^[A-Za-z]+$', name):
             raise ValueError
 
     _type_success = 0
@@ -79,13 +81,13 @@ class AbstractCustomFeed(polymodel.PolyModel):
     item_date_selector = db.StringProperty(default="")
     item_date_attr = db.StringProperty(default="")
 
-    def _updatebydict(self, dict):
+    def setbypost(self, post):
         for key in self.properties():
-            if dict.has_key(key):
+            if post.has_key(key):
                 if isinstance(getattr(self, key), bool):
-                    setattr(self, key, bool(dict[key]))
+                    setattr(self, key, bool(post[key]))
                 else:
-                    setattr(self, key, dict[key])
+                    setattr(self, key, post[key])
 
 
 class CustomFeed(AbstractCustomFeed):
@@ -104,8 +106,8 @@ class CustomTest(AbstractCustomFeed):
     def valid_customdata(data):
         if data == None: return
     
-        if len(data) >= (50 * 1024):
-            raise ValueError
+        if len(data) >= (300 * 1024):
+            raise ValueError, "データサイズが大きすぎます"
 
     data = db.TextProperty(default=defines.defaulttesthtml, validator=valid_customdata)
 
@@ -123,6 +125,7 @@ class FeedData(db.Model):
 
     atom = db.TextProperty(default="", validator=valid_feed)
     rss = db.TextProperty(default="", validator=valid_feed)
-#     rdf = db.TextProperty(default="", validator=valid_feed)
+    rdf = db.TextProperty(default="", validator=valid_feed)
     time = db.DateTimeProperty(auto_now=True)
+
 
