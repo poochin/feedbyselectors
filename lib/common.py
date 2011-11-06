@@ -11,16 +11,22 @@ import models
 from soupselect import select
 
 def error(handler, no, message="Fail to load."):
-    ''' エラー用の画面を出力します。 '''
+    '''error(handler, no, message="Fail to load.")
+
+    RequestHandler を使いエラーを出力します
+    '''
     handler.error(no)
     path = os.path.join(os.path.dirname(__file__), '../templates/error.html')
     handler.response.out.write(template.render(path, {'error_message': message}))
 
 
 def currentuser():
-    ''' 現在のログインユーザを取得して返します。 '''
+    '''currentuser()
+    
+    ログイン中のユーザエンティティを返します
+    '''
     user = User()
-    u = models.User.all().filter('user =', user).get()
+    u = models.User.get_or_insert(str(user), user=user)
     if not u:
         u = models.User(user=user)
         u.put()
@@ -30,7 +36,12 @@ def currentuser():
 
 
 def selectortext(soup, selector, attr):
-    ''' dom object に対して selector で抽出した後、目的の属性の内容を取得します。 attr が空ならば要素内容を返す。'''
+    '''selectortext(soup, selector, attr)
+
+    soup オブジェクトについて selector でオブジェクトを指定し、
+    その soup オブジェクトの attr 属性の値を取得します。
+    ただし attr == None の場合は要素内容を返します。
+    '''
     elms = select(soup, selector)
     if attr:
         return [el[attr] if el.has_key(attr) else None for el in elms]
@@ -39,7 +50,10 @@ def selectortext(soup, selector, attr):
 
 
 def buildatom(author, rss_title, rss_link, rss_description, items):
-    ''' django のライブラリを利用して Atom Feed を作成します。 '''
+    '''buildatom(author, rss_title, rss_link, rss_description, items)
+
+    django の feedgenerator を使用して Atom を作成します
+    '''
     fg = feedgenerator.Atom1Feed(
         title=rss_title,
         link=rss_link,
@@ -54,7 +68,10 @@ def buildatom(author, rss_title, rss_link, rss_description, items):
 
 
 def buildrss(author, rss_title, rss_link, rss_description, items):
-    ''' django のライブラリを利用して RSS Feed を作成します。 '''
+    '''buildrss(author, rss_title, rss_link, rss_description, items)
+
+    django の feedgenerator を使用して RSS を作成します
+    '''
     fg = feedgenerator.Rss201rev2Feed(
         title=rss_title,
         link=rss_link,
@@ -68,7 +85,10 @@ def buildrss(author, rss_title, rss_link, rss_description, items):
     return fg.writeString('UTF-8')
 
 def buildrdf(author, rss_title, rss_link, rss_description, items):
-    ''' django のライブラリを利用して RSS Feed を作成します。 '''
+    '''buildrdf(author, rss_title, rss_link, rss_description, items)
+
+    django の feedgenerator を使用して RDF を作成します
+    '''
     fg = feedgenerator.RssUserland091Feed(
         title=rss_title,
         link=rss_link,
@@ -80,6 +100,4 @@ def buildrdf(author, rss_title, rss_link, rss_description, items):
         fg.add_item(**item)
 
     return fg.writeString('UTF-8')
-
-
 
