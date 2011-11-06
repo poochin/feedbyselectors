@@ -25,7 +25,7 @@ from google.appengine.api import urlfetch
 
 from lib.BeautifulSoup import BeautifulSoup as Soup
 
-from lib import mydb
+from lib import moels
 from lib import common
 
 
@@ -41,9 +41,9 @@ class CustomtestHandler(webapp.RequestHandler):
             common.error(self, 404, "ユーザを確認出来ませんでした。")
             return
 
-        ct = mydb.CustomTest.all().ancestor(user).get()
+        ct = moels.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = mydb.CustomTest(parent=user)
+            ct = moels.CustomTest(parent=user)
             ct.put()
 
         template_values = {'ct': ct}
@@ -66,7 +66,7 @@ class CustomtestHandler(webapp.RequestHandler):
             if texts == False:
                 return
 
-            ct = mydb.CustomTest.all().ancestor(user).get()
+            ct = moels.CustomTest.all().ancestor(user).get()
 
             template_values = {'ct': ct, 'texts': texts}
             path = os.path.join(os.path.dirname(__file__), 'templates/customtest.html')
@@ -80,9 +80,9 @@ class CustomtestHandler(webapp.RequestHandler):
             common.error(self, 404, "User not found.")
             return
 
-        ct = mydb.CustomTest.all().ancestor(user).get()
+        ct = moels.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = mydb.CustomTest(parent=user)
+            ct = moels.CustomTest(parent=user)
 
         ct.setbypost(self.request.POST)
 
@@ -114,9 +114,9 @@ class CustomtestHandler(webapp.RequestHandler):
             common.error(self, 404, "User not found")
             return False
 
-        ct = mydb.CustomTest.all().ancestor(user).get()
+        ct = moels.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = mydb.CustomTest(parent=user)
+            ct = moels.CustomTest(parent=user)
 
         ct.setbypost(self.request.POST)
 
@@ -134,7 +134,7 @@ class CustomtestHandler(webapp.RequestHandler):
             common.error(self, 404, "User not found")
             return False
 
-        ct = mydb.CustomTest.all().ancestor(user).get()
+        ct = moels.CustomTest.all().ancestor(user).get()
         if not ct:
             return False
 

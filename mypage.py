@@ -25,7 +25,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api.users import User
 from google.appengine.ext import db
 
-from lib import mydb
+from lib import models
 from lib import common
 
 
@@ -39,7 +39,7 @@ class MypageHandler(webapp.RequestHandler):
         if not user:
             common.error(self, 404, 'ユーザが見つかりませんでした。')
 
-        myfeeds = mydb.CustomFeed.all().ancestor(user).fetch(1000)
+        myfeeds = models.CustomFeed.all().ancestor(user).fetch(1000)
         template_values = {'username': user.user, 'userid': user.key().id(), 'feeds': myfeeds}
         path = os.path.join(os.path.dirname(__file__), 'templates/mypage.html')
 
@@ -58,11 +58,11 @@ class NewfeedHandler(webapp.RequestHandler):
         user = common.currentuser()
 
         newfeedname = self.request.POST['name']
-        if mydb.CustomFeed.get_by_key_name(newfeedname, parent=user):
+        if models.CustomFeed.get_by_key_name(newfeedname, parent=user):
             common.error(self, 409, "ページが既に存在します。")
             return
 
-        cf = mydb.CustomFeed(parent=user, key_name=newfeedname, name=newfeedname)
+        cf = models.CustomFeed(parent=user, key_name=newfeedname, name=newfeedname)
         if not cf.put():
             common.error(self, 400, "フィードの作成に失敗しました。")
             return
@@ -80,7 +80,7 @@ class DeletefeedHandler(webapp.RequestHandler):
         user = common.currentuser()
 
         feedname = self.request.POST['name']
-        cf = mydb.CustomFeed.get_by_key_name(feedname, parent=user)
+        cf = models.CustomFeed.get_by_key_name(feedname, parent=user)
         if not cf:
             common.error(self, 400, "ページは存在しません。")
             return

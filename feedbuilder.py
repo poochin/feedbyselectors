@@ -27,11 +27,11 @@ from google.appengine.api.urlfetch import fetch
 from lib.BeautifulSoup import BeautifulSoup as Soup
 from lib.dateutil.parser import parse as dateparser
 
-from lib import mydb
+from lib import models
 from lib import common
 
 
-static_offset = 0  # mydb.User を参照するための offset の位置です
+static_offset = 0  # models.User を参照するための offset の位置です
 user_cursor = None # TODO: Queue.with_cursor が使えないか試してみる
 
 
@@ -39,7 +39,7 @@ def getcrawluser():
     ''' クロールすべきユーザを取得する '''
     global static_offset
 
-    user = mydb.User.all().fetch(1, static_offset)
+    user = models.User.all().fetch(1, static_offset)
 
     if not user:
         static_offset = 0
@@ -61,10 +61,10 @@ class FeedbuilderHandler(webapp.RequestHandler):
             return
 
         # ユーザのログがリミットを超えていた場合はその分を削除します
-        for log in mydb.Log.all().ancestor(user).order('-time').fetch(1000, offset=mydb.Log._savecount):
+        for log in models.Log.all().ancestor(user).order('-time').fetch(1000, offset=models.Log._savecount):
             log.delete()
 
-        customfeeds = mydb.CustomFeed.all().ancestor(user).order('time').fetch(1000)
+        customfeeds = models.CustomFeed.all().ancestor(user).order('time').fetch(1000)
         for cf in customfeeds:
             if not cf.rss_link:
                 continue
@@ -79,7 +79,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_title)
 
                     message = u"Title 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
+                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_link_enable:
                     item_links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
@@ -87,7 +87,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_link)
 
                     message = u"Link 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
+                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_description_enable:
                     item_descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
@@ -95,7 +95,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_description)
 
                     message = u"Description 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
+                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
                 if cf.item_date_enable:
                     item_dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
@@ -103,7 +103,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     dict_compilelist.append(dlist_date)
 
                     message = u"Date 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    mydb.Log(feedname=cf.name, type=mydb.Log._types['info'], message=message, parent=user).put()
+                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
                 items = []
                 for dl in zip(*dict_compilelist):
@@ -111,9 +111,9 @@ class FeedbuilderHandler(webapp.RequestHandler):
                     d.update(dict(dl))
                     items.append(d)
 
-                feeddata = mydb.FeedData.get_by_key_name(cf.name, parent=cf)
+                feeddata = models.FeedData.get_by_key_name(cf.name, parent=cf)
                 if not feeddata:
-                    feeddata = mydb.FeedData(parent=cf, key_name=cf.name)
+                    feeddata = models.FeedData(parent=cf, key_name=cf.name)
 
                 rss_title = cf.rss_title.encode('UTF-8')
                 rss_link = cf.rss_link.encode('UTF-8')
@@ -128,14 +128,14 @@ class FeedbuilderHandler(webapp.RequestHandler):
 
             except:
                 message = u"何かエラーが発生しました。"
-                log = mydb.Log(feedname=cf.name, type=mydb.Log._types['error'], message=message, parent=user)
+                log = models.Log(feedname=cf.name, type=models.Log._types['error'], message=message, parent=user)
                 if not log.put():
                     pass  # すみません。 もうどうしようもないです
                 raise  # 適切なエラーを定義して正しく登らせるようにする
 
             else:
                 message = u"カスタムフィードの作成に成功しました。"
-                log = mydb.Log(feedname=cf.name, type=mydb.Log._types['success'], message=message, parent=user)
+                log = models.Log(feedname=cf.name, type=models.Log._types['success'], message=message, parent=user)
                 if not log.put():
                     pass  # ログが保存出来なかった場合はどうしようか考えていません。
 

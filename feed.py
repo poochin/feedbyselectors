@@ -24,7 +24,7 @@ from google.appengine.ext.webapp import template
 from cgi import escape
 
 from lib import common
-from lib import mydb
+from lib import models
 
 
 class FeedHandler(webapp.RequestHandler):
@@ -33,17 +33,17 @@ class FeedHandler(webapp.RequestHandler):
     def get(self, uid, feedname, feedtype=None):
         ''' 指定されたフィードを出力します '''
 
-        user = mydb.User.get_by_id(int(uid))
+        user = models.User.get_by_id(int(uid))
         if not user:
             common.error(self, 404, 'User ID is not found.')
             return
 
-        cf = mydb.CustomFeed.get_by_key_name(feedname, parent=user)
+        cf = models.CustomFeed.get_by_key_name(feedname, parent=user)
         if not cf:
             common.error(self, 404, 'CutomFeed is not found.')
             return
         
-        feed = mydb.FeedData.get_by_key_name(feedname, parent=cf)
+        feed = models.FeedData.get_by_key_name(feedname, parent=cf)
         if not feed:
             common.error(self, 404, 'Feed data is not found.')
             return

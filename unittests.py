@@ -47,7 +47,7 @@ from google.appengine.ext import db
 from BeautifulSoup import BeautifulSoup as Soup
 
 # テスト対象のクラスをインポート
-from lib import mydb
+from lib import models
 from lib import common
 from lib import defines
 
@@ -93,33 +93,33 @@ class GAETestBase(unittest.TestCase):
 class UserTest(GAETestBase):
     ''' ユーザの登録テスト '''
     def testUser(self):
-        mydb.User(user=users.User('test@gmail.com')).put()
-        self.assertEqual(1, mydb.User.all().count())
+        models.User(user=users.User('test@gmail.com')).put()
+        self.assertEqual(1, models.User.all().count())
 
 
 class LogTest(GAETestBase):
     ''' '''
     def testLog(self):
-        user = mydb.User(user=users.User('test@gmail.com'))
+        user = models.User(user=users.User('test@gmail.com'))
         user.put()
 
-        log = mydb.Log(parent=user, feedname='test', type=mydb.Log._types['success'], message=u'テスト')
+        log = models.Log(parent=user, feedname='test', type=models.Log._types['success'], message=u'テスト')
         log.put()
 
-        self.assertEqual(1, mydb.Log.all().ancestor(user).count())
+        self.assertEqual(1, models.Log.all().ancestor(user).count())
 
 
 class CustomFeedTest(GAETestBase):
     ''' '''
     def testFeed(self):
-        user = mydb.User(user=users.User('test@gmail.com'))
+        user = models.User(user=users.User('test@gmail.com'))
         user.put()
 
-        feed = mydb.CustomFeed(parent=user, name=u'test')
+        feed = models.CustomFeed(parent=user, name=u'test')
         feed.setbypost(posts)
         feed.put()
 
-        cf = mydb.CustomFeed.all().ancestor(user).get()
+        cf = models.CustomFeed.all().ancestor(user).get()
         feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if posts.has_key(key))
 
         d = dict((key, posts[key]) for key in cf.properties() if posts.has_key(key))
@@ -129,14 +129,14 @@ class CustomFeedTest(GAETestBase):
 class CustomTestTest(GAETestBase):
     ''' '''
     def testCustomTest(self):
-        user = mydb.User(user=users.User('test@gmail.com'))
+        user = models.User(user=users.User('test@gmail.com'))
         user.put()
 
-        feed = mydb.CustomTest(parent=user, name=u'test')
+        feed = models.CustomTest(parent=user, name=u'test')
         feed.setbypost(posts)
         feed.put()
 
-        cf = mydb.CustomFeed.all().ancestor(user).get()
+        cf = models.CustomFeed.all().ancestor(user).get()
         feeddict = dict((key, getattr(feed, key)) for key in feed.properties() if posts.has_key(key))
 
         self.assertEqual(posts, feeddict)
@@ -145,10 +145,10 @@ class CustomTestTest(GAETestBase):
 class FeedDataTest(GAETestBase):
     ''' '''
     def testFeedData(self):
-        user = mydb.User(user=users.User('test@gmail.com'))
+        user = models.User(user=users.User('test@gmail.com'))
         user.put()
 
-        feed = mydb.CustomFeed(parent=user, name=u'test')
+        feed = models.CustomFeed(parent=user, name=u'test')
         feed.setbypost(posts)
         feed.put()
 
@@ -162,7 +162,7 @@ class FeedDataTest(GAETestBase):
         rss_link = posts['rss_link'].encode('UTF-8')
         rss_description = posts['rss_description'].encode('UTF-8')
 
-        fd = mydb.FeedData(parent=feed)
+        fd = models.FeedData(parent=feed)
         fd.atom = common.buildatom('Anon', rss_title, rss_link, rss_description, items)
         if common.django.VERSION < (1, 1, 5):
             # django <= 1.1.4 でなければ RSS と RDF の作成時にエラーが出る
@@ -170,7 +170,7 @@ class FeedDataTest(GAETestBase):
             fd.rdf = common.buildrdf('Anon', posts['rss_title'], posts['rss_link'], posts['rss_description'], items)
         fd.put()
 
-        self.assertEqual(1, mydb.FeedData.all().ancestor(user).count())
+        self.assertEqual(1, models.FeedData.all().ancestor(user).count())
 
 
 if __name__ == '__main__':

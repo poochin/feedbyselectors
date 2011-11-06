@@ -22,7 +22,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
 
-from lib import mydb
+from lib import models
 from lib import common
 
 
@@ -35,7 +35,7 @@ class EditHandler(webapp.RequestHandler):
             common.error(self, 404, 'not accept user')
             return
 
-        cf = mydb.CustomFeed.get_by_key_name(feedname, parent=u)
+        cf = models.CustomFeed.get_by_key_name(feedname, parent=u)
         if not cf:
             common.error(self, 404, "フィードが存在しません。");
             return
@@ -52,7 +52,7 @@ class EditHandler(webapp.RequestHandler):
             common.error(self, 404, 'not accept user')
             return
 
-        feed = mydb.CustomFeed.get_by_key_name(feedname, parent=u)
+        feed = models.CustomFeed.get_by_key_name(feedname, parent=u)
         if not feed:
             common.error(self, 404, 'Feed not found')
             return
