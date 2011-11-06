@@ -40,7 +40,7 @@ class MypageHandler(webapp.RequestHandler):
             common.error(self, 404, 'ユーザが見つかりません')
             return
 
-        myfeeds = [models.CustomFeed.all().ancestor(user)]
+        myfeeds = models.CustomFeed.all().ancestor(user).fetch(1000)
         template_values = {'username': user.user, 'userid': user.key().id(), 'feeds': myfeeds}
         path = os.path.join(os.path.dirname(__file__), 'templates/mypage.html')
 

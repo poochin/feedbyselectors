@@ -37,7 +37,7 @@ class LogviewHandler(webapp.RequestHandler):
             common.error(self, 404, "User not found.")
             return
 
-        logs = [models.Log.all().order('-time').ancestor(user)]
+        logs = models.Log.all().order('-time').ancestor(user).fetch(1000)
 
         template_values = {'logs': logs}
         path = os.path.join(os.path.dirname(__file__), 'templates/log.html')
