@@ -25,25 +25,25 @@ from google.appengine.api import urlfetch
 
 from lib.BeautifulSoup import BeautifulSoup as Soup
 
-from lib import moels
+from lib import models
 from lib import common
+from lib import defines
 
 
 class CustomtestHandler(webapp.RequestHandler):
-    '''
-        カスタムテストの入力を受け付けます
-    '''
+    '''CustomtestHandler(webapp.RequestHandler)
 
-    def get(self, a):
-        '''  '''
+    ユーザによるフィード作成のテスト環境を提供します
+    '''
+    def get(self):
         user = common.currentuser()
         if not user:
             common.error(self, 404, "ユーザを確認出来ませんでした。")
             return
 
-        ct = moels.CustomTest.all().ancestor(user).get()
+        ct = models.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = moels.CustomTest(parent=user)
+            ct = models.CustomTest(parent=user)
             ct.put()
 
         template_values = {'ct': ct}
@@ -51,11 +51,11 @@ class CustomtestHandler(webapp.RequestHandler):
         
         self.response.out.write(template.render(path, template_values))
 
-
     def post(self, action):
         ''' セレクタの保存と取得を行なっている '''
         if action == 'url':
             self.seturl()
+            self.redirect('/customtest')
 
         else :
             user = common.currentuser()
@@ -66,32 +66,34 @@ class CustomtestHandler(webapp.RequestHandler):
             if texts == False:
                 return
 
-            ct = moels.CustomTest.all().ancestor(user).get()
+            ct = models.CustomTest.all().ancestor(user).get()
 
             template_values = {'ct': ct, 'texts': texts}
             path = os.path.join(os.path.dirname(__file__), 'templates/customtest.html')
 
             self.response.out.write(template.render(path, template_values))
 
-
     def seturl(self):
+        '''URLとURLからフェッチして保存します'''
         user = common.currentuser()
         if not user:
             common.error(self, 404, "User not found.")
             return
 
-        ct = moels.CustomTest.all().ancestor(user).get()
+        ct = models.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = moels.CustomTest(parent=user)
+            ct = models.CustomTest(parent=user)
 
         ct.setbypost(self.request.POST)
 
-        result = urlfetch.fetch(ct.rss_link)
-        if result.status_code != 200:
-            common.error(self, 200, "Url Fetch Error")
-            return
-
-        soup = Soup(result.content)
+        if not ct.rss_link:
+            soup = Soup(defines.defaulttesthtml)
+        else:
+            result = urlfetch.fetch(ct.rss_link)
+            if result.status_code != 200:
+                common.error(self, 200, "Url Fetch Error")
+                return
+            soup = Soup(result.content)
 
         try: 
             ct.data = soup.prettify().decode('UTF-8')
@@ -103,20 +105,16 @@ class CustomtestHandler(webapp.RequestHandler):
             common.error(self, 200, 'fail to save')
             return
 
-        self.redirect('/customtest')
-        return
-
     def setselectors(self):
-        ''' Selectors などの設定を保存します '''
-
+        '''POSTデータをカスタムテストエンティティに保存します'''
         user = common.currentuser()
         if not user:
             common.error(self, 404, "User not found")
             return False
 
-        ct = moels.CustomTest.all().ancestor(user).get()
+        ct = models.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = moels.CustomTest(parent=user)
+            ct = models.CustomTest(parent=user)
 
         ct.setbypost(self.request.POST)
 
@@ -127,14 +125,13 @@ class CustomtestHandler(webapp.RequestHandler):
         return True
 
     def getselectorstexts(self):
-        ''' Selectors などの設定から texts を取得します '''
-
+        '''カスタムテストエンティティのセレクタ属性セットから各テキストを取得します'''
         user = common.currentuser()
         if not user:
             common.error(self, 404, "User not found")
             return False
 
-        ct = moels.CustomTest.all().ancestor(user).get()
+        ct = models.CustomTest.all().ancestor(user).get()
         if not ct:
             return False
 
@@ -154,7 +151,10 @@ class CustomtestHandler(webapp.RequestHandler):
            
 
 def main():
-    url_mapping = [('/customtest(?:/(.+))?', CustomtestHandler)]
+    url_mapping = [
+        ('/customtest', CustomtestHandler),
+        ('/customtest/(.+)', CustomtestHandler)
+    ]
     application = webapp.WSGIApplication(url_mapping, debug=True)
     util.run_wsgi_app(application)
 
