@@ -43,7 +43,7 @@ class CustomtestHandler(webapp.RequestHandler):
 
         ct = models.CustomTest.all().ancestor(user).get()
         if not ct:
-            ct = models.CustomTest(parent=user)
+            ct = models.CustomTest(name='custom', parent=user)
             ct.put()
 
         template_values = {'ct': ct}
