@@ -30,19 +30,17 @@ from lib import defines
 
 
 class TestpageHandler(webapp.RequestHandler):
-    ''' Testpage のリクエストを受け付けています '''
+    '''TestpageHandler(webapp.RequestHandler)
 
+    ログイン無しで FeedbySelectors のテスト環境を提供します。
+    '''
     def get(self):
-        ''' Testpage を標準状態で出力します '''
-
         template_values = {'code': defines.defaulttesthtml}
         path = os.path.join(os.path.dirname(__file__), 'templates/testpage.html')
 
         self.response.out.write(template.render(path, template_values))
         
     def post(self):
-        ''' Testpage についてセレクタと属性の入力があった場合 '''
-
         posts = self.request.POST
 
         soup = Soup(defines.defaulttesthtml)
