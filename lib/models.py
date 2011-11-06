@@ -12,16 +12,18 @@ import defines
 
 
 class User(db.Model):
-    ''' ユーザの gmail アドレスを保管するだけのエンティティ '''
-    user = db.UserProperty()
+    '''User(db.Model)
+
+    各エンティティをユーザが保持する為のルートエンティティです
+    '''
+    user = db.UserProperty(required=True)
 
 
 class Log(db.Model):
+    '''Log(db.Model)
+
+    問題が生じた際に問題を推測、理解できるように各ユーザ個別のログ
     '''
-        User の子エンティティ
-        ユーザのログを保管します
-    '''
- 
     def valid_feedname(name):
         if name == None: return
         if len(name) == 0: return
@@ -32,16 +34,16 @@ class Log(db.Model):
     _types = {'success': 0, 'info': 1, 'worning': 2, 'error': 3}
     _savecount = 100
 
-    feedname = db.StringProperty(validator=valid_feedname)
-    type = db.IntegerProperty(choices=_types.values())
+    feedname = db.StringProperty(validator=valid_feedname, required=True)
+    type = db.IntegerProperty(choices=_types.values(), required=True)
     message = db.StringProperty(default="")
     time = db.DateTimeProperty(auto_now=True)
 
 
 class AbstractCustomFeed(polymodel.PolyModel):
-    '''
-        カスタムフィードの抽象型
-        ユーザのカスタムフィードを保管します
+    '''AbstractCustomFeed(polymodel.PolyModel)
+
+    ユーザがカスタムフィードを保持する為の基底クラスです
     '''
     def valid_feedname(name):
         if name == None: return
@@ -57,7 +59,7 @@ class AbstractCustomFeed(polymodel.PolyModel):
         if not re.match('https?://', url):
             raise ValueError
 
-    name = db.StringProperty(validator=valid_feedname)
+    name = db.StringProperty(required=True, validator=valid_feedname)
     time = db.DateTimeProperty(auto_now=True)
 
     rss_title = db.StringProperty(default="")
@@ -87,17 +89,14 @@ class AbstractCustomFeed(polymodel.PolyModel):
 
 
 class CustomFeed(AbstractCustomFeed):
-    '''
-        カスタムフィード
-        ユーザのフィード設定を保管します
-    '''
+    '''CustomFeed(AbstractCustomFeed)''' 
     pass
 
 
 class CustomTest(AbstractCustomFeed):
-    '''
-        カスタムテスト
-        ユーザによるテストの設定を保管します
+    '''CustomTest(AbstractCustomFeed)
+
+    ユーザが個人的に実験する為のエンティティです
     '''
     def valid_customdata(data):
         if data == None: return
@@ -109,8 +108,9 @@ class CustomTest(AbstractCustomFeed):
 
 
 class FeedData(db.Model):
-    '''
-        カスタムフィードを元に作成したフィードのデータ
+    '''FeedData(db.Model)
+
+    カスタムフィードを元に作成した各フィードを保持します
     '''
     def valid_feed(f):
         if f == None: return
