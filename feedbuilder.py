@@ -73,28 +73,32 @@ class FeedbuilderHandler(webapp.RequestHandler):
 
             dict_compilelist = []
 
+            message = u''
             if cf.item_title_enable:
                 titles = common.selectortext(soup, cf.item_title_selector, cf.item_title_attr)
                 dlist_title = [('title', t) for t in titles]
                 dict_compilelist.append(dlist_title)
+                message += u'(title %d 個) ' % (len(titles))
             
             if cf.item_link_enable:
                 links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
                 dlist_link = [('link', l) for l in links]
                 dict_compilelist.append(dlist_link)
+                message += u'(links %d 個) ' % (len(links))
 
             if cf.item_description_enable:
                 descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
                 dlist_description = [('description', d) for d in descriptions]
                 dict_compilelist.append(dlist_description)
+                message += u'(descriptions %d 個) ' % (len(descriptions))
 
             if cf.item_date_enable:
                 dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
                 dlist_date = [('pubdate', dateparser(d)) for d in dates]
                 dict_compilelist.append(dlist_date)
+                message += u'(dates %d 個) ' % (len(dates))
 
-            message = u'title %d 個, link %d 個, description %d 個, dates %d 個 見つかりました。' % (
-                len(titles), len(links), len(descriptions), len(dates))
+            message += u'見つかりました。'
             models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
             items = []
