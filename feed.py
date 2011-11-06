@@ -21,6 +21,7 @@ import os
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext.webapp import template
+from cgi import escape
 
 from lib import common
 from lib import mydb
@@ -29,7 +30,7 @@ from lib import mydb
 class FeedHandler(webapp.RequestHandler):
     ''' カスタムフィードに沿って作成したフィードへのリクエストを受け付けています '''
 
-    def get(self, uid, feedname):
+    def get(self, uid, feedname, feedtype=None):
         ''' 指定されたフィードを出力します '''
 
         user = mydb.User.get_by_id(int(uid))
@@ -41,26 +42,23 @@ class FeedHandler(webapp.RequestHandler):
         if not cf:
             common.error(self, 404, 'CutomFeed is not found.')
             return
-            
+        
         feed = mydb.FeedData.get_by_key_name(feedname, parent=cf)
-
         if not feed:
             common.error(self, 404, 'Feed data is not found.')
             return
 
-        self.response.out.write(feed.rss)
+        if feedtype == None:
+            template_values = {'uid': uid, 'cf': cf, 'nickname': ''}
+            path = os.path.join(os.path.dirname(__file__), 'templates/feed.html')
 
-    def get(self, uid, feedname, feedtype):
-        if feedtype == 'rdf':
-            pass
-        elif feedtype == 'rdf':
-            pass
-        elif feedtype == 'atom':
-            pass
+            self.response.out.write(template.render(path, template_values))
+        else: 
+            self.response.out.write(getattr(feed, feedtype))
 
 
 def main():
-    url_mapping = [('/feed/(\d+)/(.+)', FeedHandler)]
+    url_mapping = [('/feed/(\d+)/([a-zA-Z]+)(?:/(atom|rss|rdf))?', FeedHandler)]
     application = webapp.WSGIApplication(url_mapping, debug=True)
     util.run_wsgi_app(application)
 

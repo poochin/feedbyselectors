@@ -15,7 +15,7 @@
     </form>
     <h3>カスタムフィード</h3>
     <div class="row">
-      <div class="span5 offset1">
+      <div class="span8 offset1">
         {% if feeds %}
         <table>
           <tr>
@@ -28,6 +28,9 @@
             <td><a href="/edit/{{ feed.name }}">{{ feed.name }}</a></td>
             <td>
               <a href="/feed/{{ userid }}/{{ feed.name }}">/feed/{{ userid }}/{{ feed.name }}</a>
+              - <a href="/feed/{{ userid }}/{{ feed.name }}/rdf">Rdf</a>
+              - <a href="/feed/{{ userid }}/{{ feed.name }}/rss">Rss</a>
+              - <a href="/feed/{{ userid }}/{{ feed.name }}/atom">Atom</a>
             </td>
             <td>
               <form action="/mypage/deletefeed" method="post" style="margin: 0;">
