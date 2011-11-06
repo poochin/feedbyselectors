@@ -42,7 +42,7 @@ def nextusermodel():
 
     query = models.User.all()
     if user_cursor:
-        query.with_cursor(cursor)
+        query.with_cursor(user_cursor)
     user = query.get()
     user_cursor = query.cursor() if user else None
     return user
@@ -95,7 +95,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
 
             message = u'title %d 個, link %d 個, description %d 個, dates %d 個 見つかりました。' % (
                 len(titles), len(links), len(descriptions), len(dates))
-            models.Log(feedname=cf.name, type=model.Log._types['info'], message=message, parent=user).put()
+            models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
 
             items = []
             for dl in zip(*dict_compilelist):
