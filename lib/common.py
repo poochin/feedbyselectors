@@ -7,7 +7,7 @@ from google.appengine.api.users import User
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
 
-import mydb
+import models
 from soupselect import select
 
 def error(handler, no, message="Fail to load."):
@@ -20,9 +20,9 @@ def error(handler, no, message="Fail to load."):
 def currentuser():
     ''' 現在のログインユーザを取得して返します。 '''
     user = User()
-    u = mydb.User.all().filter('user =', user).get()
+    u = models.User.all().filter('user =', user).get()
     if not u:
-        u = mydb.User(user=user)
+        u = models.User(user=user)
         u.put()
         if not u.is_saved():
             return None
