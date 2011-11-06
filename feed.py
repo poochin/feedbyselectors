@@ -28,12 +28,13 @@ from lib import models
 
 
 class FeedHandler(webapp.RequestHandler):
-    ''' カスタムフィードに沿って作成したフィードへのリクエストを受け付けています '''
+    ''' FeedHandler(webapp.RequestHandler)
+    
+    FeedHandler はユーザIDとフィード名、そしてまたはフィードタイプの入力を得て値を返します。
+    '''
+    def get(self, userid, feedname, feedtype=None):
 
-    def get(self, uid, feedname, feedtype=None):
-        ''' 指定されたフィードを出力します '''
-
-        user = models.User.get_by_id(int(uid))
+        user = models.User.get_by_id(int(userid))
         if not user:
             common.error(self, 404, 'User ID is not found.')
             return
@@ -49,10 +50,11 @@ class FeedHandler(webapp.RequestHandler):
             return
 
         if feedtype == None:
-            template_values = {'uid': uid, 'cf': cf, 'nickname': ''}
+            template_values = {'userid': userid, 'cf': cf, 'nickname': ''}
             path = os.path.join(os.path.dirname(__file__), 'templates/feed.html')
 
             self.response.out.write(template.render(path, template_values))
+
         else: 
             self.response.out.write(getattr(feed, feedtype))
 
