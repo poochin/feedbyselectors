@@ -31,22 +31,18 @@ from lib import models
 from lib import common
 
 
-static_offset = 0  # models.User を参照するための offset の位置です
-user_cursor = None # TODO: Queue.with_cursor が使えないか試してみる
-
+user_cursor = None
 
 def getcrawluser():
     ''' クロールすべきユーザを取得する '''
-    global static_offset
+    global cursor
 
-    user = models.User.all().fetch(1, static_offset)
-
-    if not user:
-        static_offset = 0
-        return None
-
-    static_offset += 1
-    return user[0]
+    query = models.User.all()
+    if user_cursor:
+        query.with_cursor(cursor)
+    user = query.get()
+    user_cursor = query.cursor() if user else None
+    return user
 
 
 class FeedbuilderHandler(webapp.RequestHandler):
