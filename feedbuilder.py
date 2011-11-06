@@ -33,9 +33,12 @@ from lib import common
 
 user_cursor = None
 
-def getcrawluser():
-    ''' クロールすべきユーザを取得する '''
-    global cursor
+def nextusermodel():
+    '''nextusermodel()
+    
+    ユーザのイテレーションし次の対象ユーザを返します
+    '''
+    global user_cursor
 
     query = models.User.all()
     if user_cursor:
@@ -46,94 +49,83 @@ def getcrawluser():
 
 
 class FeedbuilderHandler(webapp.RequestHandler):
-    ''' Feed 作成についてのリクエストを受け付けます(基本的には cron) '''
+    '''FeedbuilderHandler(webapp.RequestHandler)
+
+    ユーザのカスタムフィードを元に各フィードを作成します
+    '''
 
     def get(self):
-        ''' ユーザのカスタムフィードを作成する '''
-
-        user = getcrawluser()
+        user = nextusermodel()
         if not user:
             common.error(self, 404, 'user not found')
             return
 
-        # ユーザのログがリミットを超えていた場合はその分を削除します
         for log in models.Log.all().ancestor(user).order('-time').fetch(1000, offset=models.Log._savecount):
             log.delete()
 
-        customfeeds = models.CustomFeed.all().ancestor(user).order('time').fetch(1000)
+        customfeeds = models.CustomFeed.all().ancestor(user).order('time')
         for cf in customfeeds:
             if not cf.rss_link:
                 continue
+
+            ref = fetch(cf.rss_link).content
+            soup = Soup(ref)
+
+            dict_compilelist = []
+
+            if cf.item_title_enable:
+                titles = common.selectortext(soup, cf.item_title_selector, cf.item_title_attr)
+                dlist_title = [('title', t) for t in titles]
+                dict_compilelist.append(dlist_title)
+            
+            if cf.item_link_enable:
+                links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
+                dlist_link = [('link', l) for l in links]
+                dict_compilelist.append(dlist_link)
+
+            if cf.item_description_enable:
+                descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
+                dlist_description = [('description', d) for d in descriptions]
+                dict_compilelist.append(dlist_description)
+
+            if cf.item_date_enable:
+                dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
+                dlist_date = [('pubdate', dateparser(d)) for d in dates]
+                dict_compilelist.append(dlist_date)
+
+            message = u'title %d 個, link %d 個, description %d 個, dates %d 個 見つかりました。' % (
+                len(titles), len(links), len(descriptions), len(dates))
+            models.Log(feedname=cf.name, type=model.Log._types['info'], message=message, parent=user).put()
+
+            items = []
+            for dl in zip(*dict_compilelist):
+                d = {'title': '', 'link': '', 'description': ''}
+                d.update(dict(dl))
+                items.append(d)
+
+            feeddata = models.FeedData.get_by_key_name(cf.name, parent=cf)
+            if not feeddata:
+                feeddata = models.FeedData(parent=cf, key_name=cf.name)
+
             try:
-                ref = fetch(cf.rss_link).content
-                soup = Soup(ref)
-
-                dict_compilelist = []
-                if cf.item_title_enable:
-                    item_titles = common.selectortext(soup, cf.item_title_selector, cf.item_title_attr)
-                    dlist_title = [('title', t) for t in item_titles]
-                    dict_compilelist.append(dlist_title)
-
-                    message = u"Title 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
-
-                if cf.item_link_enable:
-                    item_links = common.selectortext(soup, cf.item_link_selector, cf.item_link_attr)
-                    dlist_link = [('link', l) for l in item_links]
-                    dict_compilelist.append(dlist_link)
-
-                    message = u"Link 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
-
-                if cf.item_description_enable:
-                    item_descriptions = common.selectortext(soup, cf.item_description_selector, cf.item_description_attr)
-                    dlist_description = [('description', d) for d in item_descriptions]
-                    dict_compilelist.append(dlist_description)
-
-                    message = u"Description 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
-
-                if cf.item_date_enable:
-                    item_dates = common.selectortext(soup, cf.item_date_selector, cf.item_date_attr)
-                    dlist_date = [('pubdate', dateparser(d)) for d in item_dates]
-                    dict_compilelist.append(dlist_date)
-
-                    message = u"Date 用の要素が %d 個見つかりました" % (len(dlist_title))
-                    models.Log(feedname=cf.name, type=models.Log._types['info'], message=message, parent=user).put()
-
-                items = []
-                for dl in zip(*dict_compilelist):
-                    d = {'title': '', 'link': '', 'description': ''}
-                    d.update(dict(dl))
-                    items.append(d)
-
-                feeddata = models.FeedData.get_by_key_name(cf.name, parent=cf)
-                if not feeddata:
-                    feeddata = models.FeedData(parent=cf, key_name=cf.name)
-
                 rss_title = cf.rss_title.encode('UTF-8')
                 rss_link = cf.rss_link.encode('UTF-8')
                 rss_description = cf.rss_description.encode('UTF-8')
-
+    
                 feeddata.atom = common.buildatom('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
                 feeddata.rss = common.buildrss('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
                 feeddata.rdf = common.buildrdf('Anon', rss_title, rss_link, rss_description, items).decode('UTF-8')
 
                 if not feeddata.put():
                     raise ValueError  # TODO: save Error
-
             except:
                 message = u"何かエラーが発生しました。"
-                log = models.Log(feedname=cf.name, type=models.Log._types['error'], message=message, parent=user)
-                if not log.put():
-                    pass  # すみません。 もうどうしようもないです
-                raise  # 適切なエラーを定義して正しく登らせるようにする
+                models.Log(feedname=cf.name, type=models.Log._types['error'], message=message, parent=user).put()
+                raise
 
             else:
                 message = u"カスタムフィードの作成に成功しました。"
-                log = models.Log(feedname=cf.name, type=models.Log._types['success'], message=message, parent=user)
-                if not log.put():
-                    pass  # ログが保存出来なかった場合はどうしようか考えていません。
+                models.Log(feedname=cf.name, type=models.Log._types['success'], message=message, parent=user).put()
 
         
 def main():
