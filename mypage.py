@@ -30,16 +30,17 @@ from lib import common
 
 
 class MypageHandler(webapp.RequestHandler):
-    ''' ユーザによる自分のマイページに対するリクエストを受け付けます '''
+    '''MypageHandler(webapp.RequestHandler)
 
+    ユーザのマイページを表示します
+    '''
     def get(self):
-        ''' ユーザのマイページを表示します '''
-
         user = common.currentuser()
         if not user:
-            common.error(self, 404, 'ユーザが見つかりませんでした。')
+            common.error(self, 404, 'ユーザが見つかりません')
+            return
 
-        myfeeds = models.CustomFeed.all().ancestor(user).fetch(1000)
+        myfeeds = [models.CustomFeed.all().ancestor(user)]
         template_values = {'username': user.user, 'userid': user.key().id(), 'feeds': myfeeds}
         path = os.path.join(os.path.dirname(__file__), 'templates/mypage.html')
 
@@ -47,19 +48,18 @@ class MypageHandler(webapp.RequestHandler):
 
 
 class NewfeedHandler(webapp.RequestHandler):
-    ''' 新しいカスタムフィードの作成のリクエストを受け付けます '''
+    '''NewfeedHandler(webapp.RequestHandler)
 
-    def get(self):
-        ''' 不正なリクエスト '''
-        pass
-
+    カスタムフィードを作成します
+    '''
     def post(self):
-        ''' 新カスタムフィードの更新の申請'''
         user = common.currentuser()
+        if not user:
+            common.error(self, 404, 'ユーザが見つかりません')
 
         newfeedname = self.request.POST['name']
         if models.CustomFeed.get_by_key_name(newfeedname, parent=user):
-            common.error(self, 409, "ページが既に存在します。")
+            common.error(self, 409, "既にページが存在します。")
             return
 
         cf = models.CustomFeed(parent=user, key_name=newfeedname, name=newfeedname)
@@ -71,13 +71,15 @@ class NewfeedHandler(webapp.RequestHandler):
 
 
 class DeletefeedHandler(webapp.RequestHandler):
-    ''' カスタムフィードの削除のリクエストを受け付けます '''
-    def get(self):
-        ''' 不正なリクエストです '''
-        pass
+    '''DeletefeedHandler(webapp.RequestHandler)
 
+    カスタムフィードを削除します
+    '''
     def post(self):
         user = common.currentuser()
+        if not user:
+            common.error(self, 404, 'ユーザが見つかりません')
+            return
 
         feedname = self.request.POST['name']
         cf = models.CustomFeed.get_by_key_name(feedname, parent=user)
