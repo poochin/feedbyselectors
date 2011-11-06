@@ -27,9 +27,11 @@ from lib import common
 
 
 class EditHandler(webapp.RequestHandler):
-    ''' Edit ページへのリクエストを受け付けています '''
+    '''EditHandler(webapp.RequestHandler)
+
+    カスタムフィードを編集します
+    '''
     def get(self, feedname):
-        ''' Edit ページを表示します '''
         u = common.currentuser()
         if not u:
             common.error(self, 404, 'not accept user')
@@ -46,7 +48,6 @@ class EditHandler(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
     def post(self, feedname):
-        ''' Edit ページの更新を行います '''
         u = common.currentuser()
         if not u:
             common.error(self, 404, 'not accept user')
