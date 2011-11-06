@@ -1,2 +1,28 @@
-先に Wiki だけ作る
+FeedbySelectors
+@version: 0.1.0
+@author: poochin
+@site: http://poochin.sakura.ne.jp/
+@LISENCE: MIT or BSD
+
+FeedbySelectors とは
+
+FeedbySelectors とは HTML をスクレイピングして Feed を作成するツールです。
+スクレイピングに CSS セレクタを使うのが特徴です。
+
+依存ライブラリ
+
+* BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
+* soupselect: https://github.com/simonw/soupselect
+* dateutil: http://pypi.python.org/pypi/python-dateutil
+* Bootstrap: http://twitter.github.com/bootstrap/
+
+上記のライブラリの中から該当するファイルを以下のように配置してください。
+
+feedbyselectors/
+  + lib/
+  |   + BeautifulSoup.py
+  |   | soupselect.py
+  |   | dateutil/
+  | stylesheets/
+  |   + bootstrap.min.css
 
