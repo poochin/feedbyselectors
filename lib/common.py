@@ -26,7 +26,7 @@ def currentuser():
     ログイン中のユーザエンティティを返します
     '''
     user = User()
-    u = models.User.get_or_insert(str(user), user=user)
+    u = models.User.all().('user =', user).get()
     if not u:
         u = models.User(user=user)
         u.put()
