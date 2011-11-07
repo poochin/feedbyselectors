@@ -51,7 +51,7 @@ class CustomtestHandler(webapp.RequestHandler):
         
         self.response.out.write(template.render(path, template_values))
 
-    def post(self, action):
+    def post(self, action=None):
         ''' セレクタの保存と取得を行なっている '''
         if action == 'url':
             self.seturl()
