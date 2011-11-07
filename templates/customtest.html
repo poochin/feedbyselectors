@@ -135,35 +135,35 @@
     <h3>取得結果</h3>
     <h4>Title:</h4>
     {% if texts.titles %}
-    <ul>
+    <ol>
       {% for text in texts.titles %}
       <li>{{ text }}</li>
       {% endfor %}
-    </ul>
+    </ol>
     {% endif %}
     <h4>Link:</h4>
     {% if texts.links %}
-    <ul>
+    <ol>
       {% for text in texts.links %}
       <li>{{ text }}</li>
       {% endfor %}
-    </ul>
+    </ol>
     {% endif %}
     <h4>Description:</h4>
     {% if texts.descriptions %}
-    <ul>
+    <ol>
       {% for text in texts.descriptions %}
       <li>{{ text }}</li>
       {% endfor %}
-    </ul>
+    </ol>
     {% endif %}
     <h4>Date:</h4>
     {% if texts.dates %}
-    <ul>
+    <ol>
       {% for text in texts.dates %}
       <li>{{ text }}</li>
       {% endfor %}
-    </ul>
+    </ol>
     {% endif %}
     <div class="row">
       <div class="span2">
