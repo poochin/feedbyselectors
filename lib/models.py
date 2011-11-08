@@ -66,6 +66,9 @@ class AbstractCustomFeed(polymodel.PolyModel):
     rss_link = db.StringProperty(default="", validator=valid_url)
     rss_description = db.StringProperty(default="")
 
+    item_parent_enable = db.BooleanProperty(default=False)  # yet use
+    item_parent_selector = db.StringProperty(default="")  # yet use
+
     item_title_enable = db.BooleanProperty(default=True)
     item_title_selector = db.StringProperty(default="")
     item_title_attr = db.StringProperty(default="")
