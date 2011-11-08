@@ -1,5 +1,7 @@
 {% extends 'custom.html' %}
 
+{% block title %}( - ユーザフィードページ){% endblock %}
+
 {% block contain %}
   <div class="container">
     <h2>{{ nickname|default:"匿名" }} さんのフィード [{{ cf.name }}]</h2>
