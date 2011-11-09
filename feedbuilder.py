@@ -47,6 +47,14 @@ def nextusermodel():
     user_cursor = query.cursor() if user else None
     return user
 
+def logdeletion(user):
+    '''logdeletion()
+
+    トランザクションでログを一括で削除します
+    '''
+    for log in models.Log.all().ancestor(user).order('-time').fetch(1000, offset=models.Log._savecount):
+        log.delete()
+
 
 class FeedbuilderHandler(webapp.RequestHandler):
     '''FeedbuilderHandler(webapp.RequestHandler)
@@ -60,8 +68,7 @@ class FeedbuilderHandler(webapp.RequestHandler):
             common.error(self, 404, 'user not found')
             return
 
-        for log in models.Log.all().ancestor(user).order('-time').fetch(1000, offset=models.Log._savecount):
-            log.delete()
+        models.db.run_in_transaction(logdeletion, user.key())
 
         customfeeds = models.CustomFeed.all().ancestor(user).order('time')
         for cf in customfeeds:
